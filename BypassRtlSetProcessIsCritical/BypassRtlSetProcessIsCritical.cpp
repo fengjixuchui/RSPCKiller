@@ -97,6 +97,7 @@ int wmain(void)
     if (hFind == INVALID_HANDLE_VALUE)
     {
         printf("DLL File does NOT exist! please download it from here !(%d)\n", GetLastError());
+        ShellExecute(0, 0, "https://github.com/ZeroM3m0ry/BypassRtlSetProcessIsCritical/releases/tag/BypassRtlSetProcessIsCritical", 0, 0, SW_SHOW);
         return  -1;
     }
     std::string pname;
