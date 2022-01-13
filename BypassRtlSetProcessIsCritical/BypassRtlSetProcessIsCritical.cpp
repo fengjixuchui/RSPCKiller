@@ -47,6 +47,11 @@ int InjectDLL(DWORD procID, const char* dllPath)
         return -1;
     }
     void* loc = VirtualAllocEx(hProc, 0, MAX_PATH, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+    if (!loc)
+    {
+        CloseHandle(hProc);
+        return -1;
+    }
     WPM = WriteProcessMemory(hProc, loc, dllPath, strlen(dllPath) + 1, 0);
     if (!WPM)
     {
