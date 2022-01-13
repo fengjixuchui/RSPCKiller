@@ -7,27 +7,7 @@
 
 
 BOOL InjectDLL(DWORD procID, const char* dllPath);
-template <typename ... T>
-__forceinline void print_bad(const char* format, T const& ... args)
-{
-    std::cout << "[!] ";
-    printf(format, args ...);
-}
-
-template <typename ... T>
-__forceinline void print_info(const char* format, T const& ... args)
-{
-    std::cout << "[*] ";
-    printf(format, args ...);
-
-}
-
-template <typename ... T>
-__forceinline void print_good(const char* format, T const& ... args)
-{
-    std::cout << "[+] ";
-    printf(format, args ...);
-}
+#define print(format, ...) fprintf (stderr, format, __VA_ARGS__)
 
 DWORD GetProcId(const char* pn)
 {
@@ -48,7 +28,7 @@ DWORD GetProcId(const char* pn)
                 if (!_stricmp(pE.szExeFile, pn))
                 {
                     procId = pE.th32ProcessID;
-                    print_good("Process : 0x%lX\n", pE);
+                    print("Process : 0x%lX\n", pE);
                     break;
                 }
             } while (Process32Next(hSnap, &pE));
@@ -75,7 +55,7 @@ int InjectDLL(DWORD procID, const char* dllPath)
         CloseHandle(hProc);
         return -1;
     }
-    print_good("DLL Injected Succesfully 0x%lX\n", WPM);
+    print("DLL Injected Succesfully 0x%lX\n", WPM);
     HANDLE hThread = CreateRemoteThread(hProc, 0, 0, (LPTHREAD_START_ROUTINE)LoadLibraryA, loc, 0, 0);
     if (!hThread)
     {
@@ -83,7 +63,7 @@ int InjectDLL(DWORD procID, const char* dllPath)
         CloseHandle(hProc);
         return -1;
     }
-    print_good("Thread Created Succesfully 0x%lX\n", hThread);
+    print("Thread Created Succesfully 0x%lX\n", hThread);
     CloseHandle(hProc);
     VirtualFree(loc, strlen(dllPath) + 1, MEM_RELEASE);
     CloseHandle(hThread);
@@ -101,7 +81,7 @@ int wmain(void)
         return  -1;
     }
     std::string pname;
-    print_info("process name (The name of process to inject ) :");
+    print("process name (The name of process to inject ) :");
     std::cin >> pname;
     system("cls");
     DWORD procId = 0;
