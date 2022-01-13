@@ -5,8 +5,6 @@
 #include <Shlwapi.h>
 #pragma comment( lib, "shlwapi.lib")
 
-
-BOOL InjectDLL(DWORD procID, const char* dllPath);
 #define print(format, ...) fprintf (stderr, format, __VA_ARGS__)
 
 DWORD GetProcId(const char* pn)
