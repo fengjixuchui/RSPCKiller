@@ -6,9 +6,10 @@
 #pragma comment( lib, "shlwapi.lib")
 
 
+BOOL InjectDLL(DWORD procID, const char* dllPath);
 #define print(format, ...) fprintf (stderr, format, __VA_ARGS__)
 
-DWORD GetProcId(const char* pn, unsigned short int fi = 0b1101)
+DWORD GetProcId(const char* pn)
 {
     DWORD procId = 0;
     HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -24,8 +25,6 @@ DWORD GetProcId(const char* pn, unsigned short int fi = 0b1101)
                 Process32Next(hSnap, &pE);
             do
             {
-                if (fi == 0b10100111001)
-                    std::cout << pE.szExeFile << u8"\x9\x9\x9" << pE.th32ProcessID << std::endl;
                 if (!_stricmp(pE.szExeFile, pn))
                 {
                     procId = pE.th32ProcessID;
@@ -40,7 +39,7 @@ DWORD GetProcId(const char* pn, unsigned short int fi = 0b1101)
 }
 
 
-BOOL InjectDLL(DWORD procID, const char* dllPath)
+int InjectDLL(DWORD procID, const char* dllPath)
 {
     BOOL WPM = 0;
 
@@ -72,30 +71,29 @@ BOOL InjectDLL(DWORD procID, const char* dllPath)
 }
 int wmain(void)
 {
-    std::string pname, dllpath;
+    WIN32_FIND_DATA dllpath;
+    HANDLE hFind;
+    hFind = FindFirstFile("RtlSetProcessIsCriticalBypass.dll", &dllpath);
+    if (hFind == INVALID_HANDLE_VALUE)
+    {
+        printf("DLL File does NOT exist! please download it from here !(%d)\n", GetLastError());
+        ShellExecute(0, 0, "https://github.com/ZeroM3m0ry/BypassRtlSetProcessIsCritical/releases/tag/BypassRtlSetProcessIsCritical", 0, 0, SW_SHOW);
+        return  -1;
+    }
+    std::string pname;
     print("process name (The name of process to inject ) :");
     std::cin >> pname;
-    print("dll path (Full path to the desired dll ) : ");
-    std::cin >> dllpath;
     system("cls");
-
-    if (PathFileExists(dllpath.c_str()) == FALSE)
-    {
-        print("DLL File does NOT exist!");
-        return EXIT_FAILURE;
-    }
     DWORD procId = 0;
     procId = GetProcId(pname.c_str());
     if (procId == NULL)
     {
-        print("Process Not found (0x%lX)\n", GetLastError());
-        print("Here is a list of available process \n", GetLastError());
-        Sleep(3500);
-        system("cls");
-        GetProcId("skinjbir", 0b10100111001);
+        FindClose(hFind);
+        return -1;
     }
     else
-        InjectDLL(procId, dllpath.c_str());
+        InjectDLL(procId, dllpath.cFileName);
+    FindClose(hFind);
     system("pause");
     return EXIT_SUCCESS;
 }
